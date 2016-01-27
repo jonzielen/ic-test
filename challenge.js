@@ -10,25 +10,25 @@ window.onload = function () {
         // genworld expects an input object in the form { 'bounds': [3, 8], 'robos': [{x: 2, y: 1, o: 'W', command: 'rlrlff'}]}
         // where bounds represents the top right corner of the plane and each robos object represents the
         // x,y coordinates of a robot and o is a string representing their orientation. a sample object is provided below
-        var parsed = {
-            bounds: [20, 20],
-            robos: [{
-                x: 2,
-                y: 1,
-                o: 'W',
-                command: 'rlrlrff'
-            }, {
-                x: 12,
-                y: 10,
-                o: 'E',
-                command: 'fffffffffff'
-            }, {
-                x: 18,
-                y: 8,
-                o: 'N',
-                command: 'frlrlrlr'
-            }]
-        };
+        // var parsed = {
+        //     bounds: [20, 20],
+        //     robos: [{
+        //         x: 2,
+        //         y: 1,
+        //         o: 'W',
+        //         command: 'rlrlrff'
+        //     }, {
+        //         x: 12,
+        //         y: 10,
+        //         o: 'E',
+        //         command: 'fffffffffff'
+        //     }, {
+        //         x: 18,
+        //         y: 8,
+        //         o: 'N',
+        //         command: 'frlrlrlr'
+        //     }]
+        // };
 
         var parsed = {};
 
