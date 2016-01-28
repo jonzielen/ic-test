@@ -32,40 +32,14 @@ window.onload = function () {
 
         var parsed = {};
 
+        // makes string in to numbers
         function stringToNumber(s) {
             return s.split(' ').map(function(e) {
                 return Number(e);
             });
         }
 
-        function buildRobosObj(l) {
-            var parts = l.split(' ');
-            return {
-                x: Number(parts[0]),
-                y: Number(parts[1]),
-                o: parts[2].toUpperCase(),
-                command: parts[3].toLowerCase()
-            };
-        }
-
-        var rawRobos = command.split('\n').filter(function(e,i) {
-            if (i > 0) return e;
-        }).map(function(line, i, a) {
-            if (i % 2 === 0) {
-                 line = line.trim()+' '+a[i+1].trim();
-                 return line;
-            }
-            return null;
-        });
-
-        var formattedRobos = rawRobos.filter(function(e) {
-            if (e != null) {
-                return e.trim();
-            }
-        }).map(function(e) {
-            return buildRobosObj(e);
-        });
-
+        // formats bounds data
         parsed.bounds = command.split('\n').filter(function(e,i) {
             if (i === 0) return e;
         }).map(function(line, i) {
@@ -75,7 +49,38 @@ window.onload = function () {
             return obj;
         });
 
-        parsed.robos = formattedRobos;
+        // foramts robos data
+        function formattedRobos() {
+            function buildRobosObj(l) {
+                var parts = l.split(' ');
+                return {
+                    x: Number(parts[0]),
+                    y: Number(parts[1]),
+                    o: parts[2].toUpperCase(),
+                    command: parts[3].toLowerCase()
+                };
+            }
+
+            var rawRobos = command.split('\n').filter(function(e,i) {
+                if (i > 0) return e;
+            }).map(function(line, i, a) {
+                if (i % 2 === 0) {
+                     line = line.trim()+' '+a[i+1].trim();
+                     return line;
+                }
+                return null;
+            });
+
+            var editedRobos = rawRobos.filter(function(e) {
+                if (e != null) return e.trim();
+            }).map(function(e) {
+                return buildRobosObj(e);
+            });
+
+            return editedRobos;
+        }
+
+        parsed.robos = formattedRobos();
 
         return parsed;
     };
