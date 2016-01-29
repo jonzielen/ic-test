@@ -112,38 +112,82 @@ window.onload = function () {
         // X = left/right
         // Y = up/down
 
-        //console.log(parsed.bounds[0]);
+        //console.log(parsed.bounds);
         var maxX = parsed.bounds[0],
             maxY = parsed.bounds[1],
-            scent = [
-                // [100,1],
-                // [100,100],
-                // [0,100],
-                // [3,2]
-            ],
             direction = ['N', 'E', 'S', 'W'];
+
+        window.scent = window.scent || [];
 
         // update orientation
         function updateOrientation(command, curOrient, x, y) {
-
             // moving forward
             if (command[0] === 'f') {
                 // going forward
                 // check orientation, move + 1 that way
 
-                console.log(maxX);
-                console.log(maxY);
+                // console.log(maxX);
+                // console.log(maxY);
+                //
+                // console.log(x);
+                // console.log(y);
+                //
+                // console.log(curOrient);
 
-                console.log(x);
-                console.log(y);
+                // dir pointing
+                // check if off the grid
+                // leave marker if off the grid
+                // update cords
 
-                //return updated info
-                return {
-                    x: x,
-                    y: y,
-                    o: newOrientation,
-                    command: command.substr(1)
-                };
+                var xTemp = x,
+                    yTemp = y;
+
+                switch (curOrient) {
+                    case 'N':
+                    yTemp = y + 1;
+                        break;
+                    case 'E':
+                    xTemp = x + 1;
+                        break;
+                    case 'S':
+                    yTemp = y -1;
+                        break;
+                    case 'W':
+                    xTemp = x - 1;
+                        break;
+                }
+
+                // console.log('xtemp: '+ xTemp);
+                // console.log(x);
+                // console.log('ytemp: '+ yTemp);
+                // console.log(y);
+
+                // check if off grid, if so remove obj, and leave scent
+                function offGridCheck(x,y) {
+                    if ((x >= 0 && y >= 0) &&
+                        (x <= maxX && y <= maxY)) {
+                        //console.log(x, y);
+                        return true;
+                    }
+                    return false;
+                }
+
+                var gCheck = offGridCheck(xTemp, yTemp);
+                if (gCheck) {
+                    //return updated info
+                    return {
+                        x: xTemp,
+                        y: yTemp,
+                        o: curOrient,
+                        command: command.substr(1)
+                    };
+                } else {
+                    // OFF GRID
+                    console.log('off grid');
+                    leaveScent(x,y);
+                    // remove obj
+                    return;
+                }
             }
 
             // if moving right or left
@@ -176,13 +220,23 @@ window.onload = function () {
         }
 
         // adds position to scent array
-        function leaveScent() {
+        function leaveScent(x,y) {
+            var sCheck = window.scent.find(function(e) {
+                console.log(e);
+                if (e.toString() !== [x,y].toString()) return true;
+                return false;
+            });
 
+            console.log(sCheck);
+
+            if (sCheck == undefined || sCheck == false) {
+                window.scent.push([x, y]);
+            }
         }
 
         // checks the scent
         function checkScent(x,y) {
-            var isTrue = scent.find(function(elem) {
+            var isTrue = window.scent.find(function(elem) {
                 if (elem.toString() === [x,y].toString()) return true;
                 return null;
             });
@@ -210,26 +264,49 @@ window.onload = function () {
                     //console.log(e);
                     e = updateOrientation(e.command, e.o, e.x, e.y);
                     //console.log(e);
+                    return e;
                     // return all updated arguments
                 } else {
                     console.log('DONE');
+                    // return empty object? or nothing - it's done
                 }
                 //console.log(e.command[110]);
             } else {
                 // check the direction this is going, if off the grid remove 1st command
-                return e;
+                // CHECK THIS, but should be right
+                e = {
+                    x: e.x,
+                    y: e.y,
+                    o: e.o,
+                    command: command.substr(1)
+                };
             }
-            //console.log(e);
-            return e;
         }
 
-        robos = robos.map(function(robo) {
+        //console.log(robos);
+        //window.robos = robos;
+        var r = robos;
+
+        r = r.map(function(robo) {
             // returns udpate obj
-            //console.log(robo);
+            //console.log(oneMove(robo));
             return oneMove(robo);
         });
 
         console.log(robos);
+        console.log(r);
+
+        // robos = robos.reduce(function(obj, robo) {
+        //
+        //     //console.log(robo);
+        //
+        //     obj = oneMove(robo);
+        //     return obj;
+        // }, {});
+
+
+        //console.log(window);
+        //console.log(robos);
 
         //leave the below line in place
         placeRobos(robos);
@@ -272,7 +349,7 @@ window.onload = function () {
         tickRobos(robos);
         window.setTimeout(function () {
             genworld(parsedCommand);
-        }, 10000000000000);
+        }, 1000000000);
     };
     var placeRobos = function (robos) {
         for (var i in robos) {
