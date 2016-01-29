@@ -30,6 +30,7 @@ window.onload = function () {
         //     }]
         // };
 
+        /****** Jon's Code Start *****/
         var parsed = {};
 
         // makes string in to numbers
@@ -77,12 +78,16 @@ window.onload = function () {
                 return buildRobosObj(e);
             });
 
+            // add obj to global to get bounds in tickRobos function
+            window.parsed = parsed;
+
             return editedRobos;
         }
 
         parsed.robos = formattedRobos();
 
         return parsed;
+        /****** Jon's Code End *****/
     };
     // this function replaces teh robos after they complete one instruction
     // from their commandset
@@ -103,6 +108,128 @@ window.onload = function () {
         // cause it to leave the playfield.
 
         // !== write robot logic here ==!
+
+        // X = left/right
+        // Y = up/down
+
+        //console.log(parsed.bounds[0]);
+        var maxX = parsed.bounds[0],
+            maxY = parsed.bounds[1],
+            scent = [
+                // [100,1],
+                // [100,100],
+                // [0,100],
+                // [3,2]
+            ],
+            direction = ['N', 'E', 'S', 'W'];
+
+        // update orientation
+        function updateOrientation(command, curOrient, x, y) {
+
+            // moving forward
+            if (command[0] === 'f') {
+                // going forward
+                // check orientation, move + 1 that way
+
+                console.log(maxX);
+                console.log(maxY);
+
+                console.log(x);
+                console.log(y);
+
+                //return updated info
+                return {
+                    x: x,
+                    y: y,
+                    o: newOrientation,
+                    command: command.substr(1)
+                };
+            }
+
+            // if moving right or left
+            if (command[0] === 'r' || command[0] === 'l') {
+                if (command[0] === 'r') var move = +1;
+                if (command[0] === 'l') var move = -1;
+
+                // update orientation direction
+                function getNewOrientation(move, curOrient) {
+                    var dirVal = direction.indexOf(curOrient) + (move);
+
+                    // adjust for facing north
+                    if (dirVal === 4) dirVal = 0;
+                    // adjust for facing west
+                    if (dirVal === -1) dirVal = 3;
+
+                    return direction[dirVal];
+                };
+
+                var newOrientation = getNewOrientation(move, curOrient);
+
+                //return updated info
+                return {
+                    x: x,
+                    y: y,
+                    o: newOrientation,
+                    command: command.substr(1)
+                };
+            }
+        }
+
+        // adds position to scent array
+        function leaveScent() {
+
+        }
+
+        // checks the scent
+        function checkScent(x,y) {
+            var isTrue = scent.find(function(elem) {
+                if (elem.toString() === [x,y].toString()) return true;
+                return null;
+            });
+
+            if (isTrue) return false;
+            return true;
+        }
+
+        function oneMove(e) {
+            // check scent = DONE
+
+            // get first command
+            // update orientation or move
+            // check if off the grid, is so, update secent array
+            // return obj
+
+            var okToMove = checkScent(e.x, e.y);
+
+            if (okToMove) {
+                // get command
+                // adjust orientation
+                // get new cords
+
+                if (e.command[0]) {
+                    //console.log(e);
+                    e = updateOrientation(e.command, e.o, e.x, e.y);
+                    //console.log(e);
+                    // return all updated arguments
+                } else {
+                    console.log('DONE');
+                }
+                //console.log(e.command[110]);
+            } else {
+                // check the direction this is going, if off the grid remove 1st command
+                return e;
+            }
+            //console.log(e);
+            return e;
+        }
+
+        robos = robos.map(function(robo) {
+            // returns udpate obj
+            //console.log(robo);
+            return oneMove(robo);
+        });
+
+        console.log(robos);
 
         //leave the below line in place
         placeRobos(robos);
@@ -145,7 +272,7 @@ window.onload = function () {
         tickRobos(robos);
         window.setTimeout(function () {
             genworld(parsedCommand);
-        }, 1000);
+        }, 10000000000000);
     };
     var placeRobos = function (robos) {
         for (var i in robos) {
