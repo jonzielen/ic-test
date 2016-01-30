@@ -115,24 +115,18 @@ window.onload = function () {
         // X = left/right
         // Y = up/down
 
-        //console.log(parsed.bounds);
         var maxX = parsed.bounds[0],
             maxY = parsed.bounds[1],
             direction = ['N', 'E', 'S', 'W'];
 
+        window.lostRobos = window.lostRobos || [];
         window.scent = window.scent || [];
 
         // update orientation
         function updateOrientation(command, curOrient, x, y) {
             // moving forward
             if (command[0] === 'f') {
-                // going forward
                 // check orientation, move + 1 that way
-
-                // dir pointing
-                // check if off the grid
-                // leave marker if off the grid
-                // update cords
 
                 var xTemp = x,
                     yTemp = y;
@@ -152,7 +146,7 @@ window.onload = function () {
                         break;
                 }
 
-                // check if off grid, if so remove obj, and leave scent
+                // check if off grid
                 function offGridCheck(x,y) {
                     if ((x >= 0 && y >= 0) &&
                         (x <= maxX && y <= maxY)) {
@@ -172,9 +166,10 @@ window.onload = function () {
                     };
                 } else {
                     // OFF GRID
-                    console.log('off grid');
                     leaveScent(x,y);
-                    // remove obj
+                    lostRobosPos(xTemp,yTemp);
+
+                    // remove obj commands, it's dead
                     return {
                         x: xTemp,
                         y: yTemp,
@@ -213,23 +208,65 @@ window.onload = function () {
             }
         }
 
+        // list of positions of lost robos
+        function lostRobosPos(x,y) {
+            window.lostRobos.push([x,y]);
+        }
+
+        // checks lost robos
+        function checkLostRobos(x,y) {
+            var rCheck = window.lostRobos.find(function(item) {
+                if (item.toString() === [x,y].toString());
+            })
+
+            if (rCheck === undefined) return false;
+            return true;
+        }
+
         // adds position to scent array
         function leaveScent(x,y) {
             var sCheck = window.scent.find(function(e) {
-                console.log(e);
-                if (e.toString() !== [x,y].toString()) return true;
-                return false;
+                if (e.toString() !== [x,y].toString());
             });
 
-            if (sCheck == undefined || sCheck == false) {
+            if (sCheck == undefined) {
                 window.scent.push([x, y]);
             }
         }
 
         // checks the scent
-        function checkScent(x,y) {
+        function checkScent(x,y,command,o) {
             var isTrue = window.scent.find(function(elem) {
-                if (elem.toString() === [x,y].toString()) return true;
+                if (elem.toString() === [x,y].toString()) {
+                    // moving forward, might go off grid
+                    if (command[0] === 'f') {
+
+                        var xTemp = x,
+                            yTemp = y;
+
+                        switch (o) {
+                            case 'N':
+                            yTemp = y + 1;
+                                break;
+                            case 'E':
+                            xTemp = x + 1;
+                                break;
+                            case 'S':
+                            yTemp = y - 1;
+                                break;
+                            case 'W':
+                            xTemp = x - 1;
+                                break;
+                        }
+
+                        if (checkLostRobos(xTemp, yTemp)) {
+                            return true;
+                        }
+
+                        return null;
+                    }
+                    return null;
+                };
                 return null;
             });
 
@@ -238,52 +275,40 @@ window.onload = function () {
         }
 
         function oneMove(e) {
-            // check scent = DONE
-
-            // get first command
-            // update orientation or move
-            // check if off the grid, is so, update secent array
-            // return obj
-
-            var okToMove = checkScent(e.x, e.y);
+            var okToMove = checkScent(e.x, e.y, e.command, e.o);
 
             if (okToMove) {
-                // get command
-                // adjust orientation
-                // get new cords
-
                 if (e.command[0]) {
-                    //console.log(e);
                     e = updateOrientation(e.command, e.o, e.x, e.y);
-                    //console.log(e);
+                    // return updated params
                     return e;
-                    // return all updated arguments
                 } else {
-                    console.log('DONE');
-                    return e;
-                    // return empty object? or nothing - it's done
+                    // no more commands - it's done
+                    return {
+                        x: e.x,
+                        y: e.y,
+                        o: e.o,
+                        command: ''
+                    };
                 }
-                //console.log(e.command[110]);
             } else {
-                // check the direction this is going, if off the grid remove 1st command
-                // CHECK THIS, but should be right
-                e = {
+                // remove command that would push robo off grid
+                return e = {
                     x: e.x,
                     y: e.y,
                     o: e.o,
-                    command: command.substr(1)
+                    command: e.command.substr(1)
                 };
             }
         }
 
-
         // for loop to run the robots
-        robos[2] = oneMove(robos[2]);
+        for (var i = 0; i < robos.length; i++) {
+            robos[i] = oneMove(robos[i]);
+        }
 
-        console.log(robos[2]);
-        console.log(window.scent);
+        console.log(robos[0]);
 
-        //console.log(window.scent);
         /****** Jon's Code End *****/
 
         //leave the below line in place
