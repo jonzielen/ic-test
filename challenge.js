@@ -109,6 +109,9 @@ window.onload = function () {
 
         // !== write robot logic here ==!
 
+
+        /****** Jon's Code Start *****/
+
         // X = left/right
         // Y = up/down
 
@@ -126,14 +129,6 @@ window.onload = function () {
                 // going forward
                 // check orientation, move + 1 that way
 
-                // console.log(maxX);
-                // console.log(maxY);
-                //
-                // console.log(x);
-                // console.log(y);
-                //
-                // console.log(curOrient);
-
                 // dir pointing
                 // check if off the grid
                 // leave marker if off the grid
@@ -150,23 +145,17 @@ window.onload = function () {
                     xTemp = x + 1;
                         break;
                     case 'S':
-                    yTemp = y -1;
+                    yTemp = y - 1;
                         break;
                     case 'W':
                     xTemp = x - 1;
                         break;
                 }
 
-                // console.log('xtemp: '+ xTemp);
-                // console.log(x);
-                // console.log('ytemp: '+ yTemp);
-                // console.log(y);
-
                 // check if off grid, if so remove obj, and leave scent
                 function offGridCheck(x,y) {
                     if ((x >= 0 && y >= 0) &&
                         (x <= maxX && y <= maxY)) {
-                        //console.log(x, y);
                         return true;
                     }
                     return false;
@@ -186,7 +175,12 @@ window.onload = function () {
                     console.log('off grid');
                     leaveScent(x,y);
                     // remove obj
-                    return;
+                    return {
+                        x: xTemp,
+                        y: yTemp,
+                        o: curOrient,
+                        command: ''
+                    };
                 }
             }
 
@@ -227,8 +221,6 @@ window.onload = function () {
                 return false;
             });
 
-            console.log(sCheck);
-
             if (sCheck == undefined || sCheck == false) {
                 window.scent.push([x, y]);
             }
@@ -268,6 +260,7 @@ window.onload = function () {
                     // return all updated arguments
                 } else {
                     console.log('DONE');
+                    return e;
                     // return empty object? or nothing - it's done
                 }
                 //console.log(e.command[110]);
@@ -283,30 +276,15 @@ window.onload = function () {
             }
         }
 
-        //console.log(robos);
-        //window.robos = robos;
-        var r = robos;
 
-        r = r.map(function(robo) {
-            // returns udpate obj
-            //console.log(oneMove(robo));
-            return oneMove(robo);
-        });
+        // for loop to run the robots
+        robos[2] = oneMove(robos[2]);
 
-        console.log(robos);
-        console.log(r);
+        console.log(robos[2]);
+        console.log(window.scent);
 
-        // robos = robos.reduce(function(obj, robo) {
-        //
-        //     //console.log(robo);
-        //
-        //     obj = oneMove(robo);
-        //     return obj;
-        // }, {});
-
-
-        //console.log(window);
-        //console.log(robos);
+        //console.log(window.scent);
+        /****** Jon's Code End *****/
 
         //leave the below line in place
         placeRobos(robos);
@@ -349,7 +327,7 @@ window.onload = function () {
         tickRobos(robos);
         window.setTimeout(function () {
             genworld(parsedCommand);
-        }, 1000000000);
+        }, 1000);
     };
     var placeRobos = function (robos) {
         for (var i in robos) {
