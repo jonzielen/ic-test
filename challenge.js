@@ -50,41 +50,44 @@ window.onload = function () {
             return obj;
         });
 
-        // foramts robos data
+        // formats robos data
         function formattedRobos() {
-            function buildRobosObj(l) {
-                var parts = l.split(' ');
+            // build robos obj
+            function buildRobosObj(e) {
+                var parts = e.split(' ');
                 return {
                     x: Number(parts[0]),
-                    y: Number(parts[1]),
+                    y:  Number(parts[1]),
                     o: parts[2].toUpperCase(),
                     command: parts[3].toLowerCase()
                 };
             }
 
+            // raw robos to combined lines, in array
             var rawRobos = command.split('\n').filter(function(e,i) {
                 if (i > 0) return e;
             }).map(function(line, i, a) {
                 if (i % 2 === 0) {
-                     line = line.trim()+' '+a[i+1].trim();
-                     return line;
+                    line = line.trim()+' '+a[i+1].trim();
+                    return line;
                 }
                 return null;
             });
 
+            // filter array
             var editedRobos = rawRobos.filter(function(e) {
-                if (e != null) return e.trim();
+                if (e !== null) return e.trim();
             }).map(function(e) {
                 return buildRobosObj(e);
             });
-
-            // add obj to global to get bounds in tickRobos function
-            window.parsed = parsed;
 
             return editedRobos;
         }
 
         parsed.robos = formattedRobos();
+
+        // add bounds to global to use in tickRobos function
+        window.robosMax = parsed.bounds;
 
         return parsed;
         /****** Jon's Code End *****/
@@ -115,8 +118,8 @@ window.onload = function () {
         // X = left/right
         // Y = up/down
 
-        var maxX = parsed.bounds[0],
-            maxY = parsed.bounds[1],
+        var maxX = window.robosMax[0],
+            maxY = window.robosMax[1],
             direction = ['N', 'E', 'S', 'W'];
 
         window.lostRobos = window.lostRobos || [];
@@ -274,6 +277,7 @@ window.onload = function () {
             return true;
         }
 
+        // runs through one move
         function oneMove(e) {
             var okToMove = checkScent(e.x, e.y, e.command, e.o);
 
@@ -302,13 +306,10 @@ window.onload = function () {
             }
         }
 
-        // for loop to run the robots
+        // for loop to run each robo
         for (var i = 0; i < robos.length; i++) {
             robos[i] = oneMove(robos[i]);
         }
-
-        console.log(robos[0]);
-
         /****** Jon's Code End *****/
 
         //leave the below line in place
