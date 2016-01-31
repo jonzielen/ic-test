@@ -174,10 +174,14 @@ window.onload = function () {
 
                     // remove obj commands, it's dead
                     return {
+                        finalX: x,
+                        finalY: y,
                         x: xTemp,
                         y: yTemp,
                         o: curOrient,
-                        command: ''
+                        command: '',
+                        offGrid: true,
+                        remainingCommands: command
                     };
                 }
             }
@@ -288,12 +292,7 @@ window.onload = function () {
                     return e;
                 } else {
                     // no more commands - it's done
-                    return {
-                        x: e.x,
-                        y: e.y,
-                        o: e.o,
-                        command: ''
-                    };
+                    return e;
                 }
             } else {
                 // remove command that would push robo off grid
@@ -306,9 +305,32 @@ window.onload = function () {
             }
         }
 
+        // add all call stack, get length, return if zero
+        function totalRobosCallStack() {
+            var totalCallStack = robos.map(function(c,i,a) {
+                return c.command;
+            });
+
+            if (totalCallStack.join('').length > 0) {
+                return false
+            };
+            return true;
+        }
+
         // for loop to run each robo
         for (var i = 0; i < robos.length; i++) {
             robos[i] = oneMove(robos[i]);
+        }
+
+        // call missionSummary when longest original command completes its command stack or all robots have left the playfield
+
+        // checks if call stack is empty
+        if (totalRobosCallStack()) {
+            window.counter = window.counter || 0;
+            if (window.counter === 0) {
+                missionSummary(robos);
+            }
+            window.counter++;
         }
         /****** Jon's Code End *****/
 
@@ -319,6 +341,67 @@ window.onload = function () {
     var missionSummary = function (robos) {
         // task #3
         // summarize the mission and inject the results into the DOM elements referenced in readme.md
+
+        /****** Jon's Code Start *****/
+        var survivingRobotsElem = document.getElementById('robots'),
+            lostRobotsElem = document.getElementById('lostRobots');
+
+        // list of surviving robots
+        var survivingRobotsList = robos.filter(function(robo) {
+            if (!robo.hasOwnProperty('offGrid')) return robo;
+        });
+
+        // list of lost robots
+        var lostRobotsList = robos.filter(function(robo) {
+            if (robo.hasOwnProperty('offGrid')) return robo;
+        });
+
+        // builds new li
+        function newLi(s) {
+            var li = document.createElement('li');
+            li.innerHTML = s;
+            return li;
+        }
+
+        // adds elements to dom
+        function addToDom(child, parent) {
+            parent.appendChild(child);
+        }
+
+        // adds surviving robos to li
+        survivingRobotsList.map(function(robo) {
+            var liMessage = [];
+            liMessage[0] = 'Position: ';
+            liMessage[1] = robo.x;
+            liMessage[2] = ', ';
+            liMessage[3] = robo.y;
+            liMessage[4] = ' | Orientation: ';
+            liMessage[5] = robo.o;
+
+            var li = newLi(liMessage.join(''));
+            addToDom(li, survivingRobotsElem);
+        });
+
+        // add lost robos to li
+        lostRobotsList.map(function(robo) {
+            var liMessage = [];
+            liMessage[0] = '(Final Live) Position: ';
+            liMessage[1] = robo.finalX;
+            liMessage[2] = ', ';
+            liMessage[3] = robo.finalX;
+            liMessage[4] = ' | Orientation: ';
+            liMessage[5] = robo.o;
+            liMessage[6] = ' | Unexecuted Instructions: ';
+            liMessage[7] = robo.remainingCommands;
+            liMessage[8] = ' | Killed Moving To: ';
+            liMessage[9] = robo.x;
+            liMessage[10] = ', ';
+            liMessage[11] = robo.y;
+
+            var li = newLi(liMessage.join(''));
+            addToDom(li, lostRobotsElem);
+        });
+        /****** Jon's Code End *****/
     };
     // ~~~~~~!!!! please do not edit any code below this comment !!!!!!~~~~~~~;
     var canvas = document.getElementById('playfield')
